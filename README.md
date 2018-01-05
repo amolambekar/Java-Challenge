@@ -1,6 +1,6 @@
 # Java-Challenge
 
-This is a simple implementation of bank account transfer API. The concurrent access of accounts is managed by Reeentrant locks taken in ascending order of account id always. The implementation depends on timeout defined AcocuntsService which can be made configurable based on requirement on number of concurrent threads. A Junit tests the concurrent implementation by spawning thousands of therads and calling REST API to transfer amount.
+This is a simple implementation of bank account transfer API. The concurrent access of accounts is managed by Reeentrant locks taken in ascending order of account id always. The implementation depends on timeout defined AcocuntsService which can be made configurable based on requirement on number of concurrent threads. A Junit test AccountsServiceHighConcurrencyTest.java tests the concurrent implementation by spawning thousands of threads and calling REST API to transfer amount.
 
 Further Enhancements
 
