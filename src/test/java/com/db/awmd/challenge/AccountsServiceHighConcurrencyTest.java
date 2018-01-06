@@ -3,6 +3,7 @@ package com.db.awmd.challenge;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,19 +42,15 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest
 @Slf4j
 public class AccountsServiceHighConcurrencyTest {
-	
+
 	NotificationService emailNotificationService = Mockito.mock(NotificationService.class);
 
 	@Autowired
 	@InjectMocks
 	private AccountsService underTest;
-	
-	
-	
+
 	private static AtomicInteger transferSuccessThreadCount = new AtomicInteger(0);
 	private static AtomicInteger thransferFailureThreadCount = new AtomicInteger(0);
-
-	
 
 	private static AtomicBoolean isSetupDone = new AtomicBoolean(false);
 
@@ -71,12 +68,11 @@ public class AccountsServiceHighConcurrencyTest {
 
 	}
 
-	
-
 	@Test
 	public void testConcurrentTransactions() {
 		Runnable task1 = () -> {
 			try {
+
 				setSuccessFailureCounters(underTest.transferAmount("Id-124", "Id-125", new BigDecimal("1")));
 			} catch (InsufficientFundsException | InterruptedException | InvalidAccountException e) {
 				log.error("" + e);
@@ -90,21 +86,18 @@ public class AccountsServiceHighConcurrencyTest {
 				log.error("" + e);
 			}
 		};
-
-		IntStream.range(0, 1000).parallel().forEach(counter -> // iterates 1 to
-																// 1000
-		{
-
-			ExecutorService service = Executors.newCachedThreadPool();
+		ExecutorService service = Executors.newCachedThreadPool();
+		IntStream.range(0, 1000).parallel().forEach(counter -> {
 			service.execute(task1);
 			service.execute(task2);
-			service.shutdown();
-			try {
-				service.awaitTermination(20, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+
 		});
+		service.shutdown();
+		try {
+			service.awaitTermination(20, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 	}
 
